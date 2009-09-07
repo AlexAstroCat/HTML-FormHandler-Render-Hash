@@ -12,6 +12,7 @@ my $builder = Module::Build->new(
     build_requires     => {
         'HTML::FormHandler' => 0,
         'Test::More'        => 0,
+        'Test::Differences' => 0,
     },
 );
 

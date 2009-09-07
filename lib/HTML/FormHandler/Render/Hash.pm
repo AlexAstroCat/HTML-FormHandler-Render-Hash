@@ -42,14 +42,14 @@ sub render
     my $self = shift;
     
     my %output = (
-        fields => [],
+        field => []
     );
-    foreach my $method (qw( action name http_method )) {
-        $output{$method} = $self->$method if $self->$method;
-    }
+    $output{action} = $self->action      if $self->action;
+    $output{name}   = $self->name        if $self->name;
+    $output{method} = $self->http_method if $self->http_method;
 
     foreach my $field ($self->sorted_fields) {
-        push @{ $output{fields} }, $self->render_field($field);
+        push @{ $output{field} }, $self->render_field($field);
     }
     return \%output;
 }
@@ -175,8 +175,8 @@ sub render_radio_group
     my ( $self, $field ) = @_;
 
     my %output = (
-        options => { option => [] }
-        value   => $field->fif;
+        options => { option => [] },
+        value   => $field->fif,
     );
 
     my $index = 0;
@@ -207,12 +207,12 @@ sub render_compound
 {
    my ( $self, $field ) = @_;
 
-   my %output = {
-       fields => { field => [] }
-   };
+   my %output = (
+       field => []
+   );
    foreach my $subfield ($field->sorted_fields)
    {
-       push @{ $output->{fields}{field} }, $self->render_field($subfield);
+       push @{ $output{field} }, $self->render_field($subfield);
    }
    return \%output;
 }
