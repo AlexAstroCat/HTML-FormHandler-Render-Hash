@@ -2,8 +2,14 @@ package HTML::FormHandler::Render::Hash;
 
 use Moose::Role;
 
-with 'HTML::FormHandler::Render::Simple' =>
-   { excludes => [ 'render', 'render_field_struct', 'render_end', 'render_start' ] };
+with 'HTML::FormHandler::Render::Simple' => {
+    excludes => [qw(
+        render          render_field_struct render_text
+        render_password render_hidden       render_select
+        render_checkbox render_radio_group  render_textarea
+        render_compound render_submit
+    )]
+};
 
 =head1 NAME
 
@@ -17,37 +23,206 @@ Version 0.01
 
 our $VERSION = '0.01';
 
-
 =head1 SYNOPSIS
 
-Quick summary of what the module does.
+To render a form as a hash, use this in a form:
 
-Perhaps a little code snippet.
+    package My::Form::User;
+    with 'HTML::FormHandler::Render::Hash';
 
-    use HTML::FormHandler::Render::Hash;
+then, to render it to a template:
 
-    my $foo = HTML::FormHandler::Render::Hash->new();
+    my $data = $form->render();
     ...
 
-=head1 EXPORT
-
-A list of functions that can be exported.  You can delete this section
-if you don't export anything, such as for a purely object-oriented module.
-
-=head1 FUNCTIONS
-
-=head2 function1
-
 =cut
 
-sub function1 {
+sub render
+{
+    my $self = shift;
+    
+    my %output = (
+        fields => [],
+    );
+    foreach my $method (qw( action name http_method )) {
+        $output{$method} = $self->$method if $self->$method;
+    }
+
+    foreach my $field ($self->sorted_fields) {
+        push @{ $output{fields} }, $self->render_field($field);
+    }
+    return \%output;
 }
 
-=head2 function2
+sub render_field_struct
+{
+    my ($self, $field, $method, $class) = @_;
 
-=cut
+    my $l_type = defined $self->get_label_type( $field->widget )
+        ? $self->get_label_type( $field->widget )
+        : '';
 
-sub function2 {
+    my %output = (
+        id         => $field->id,
+        widget     => $field->widget,
+        class      => $class,
+        label_type => $l_type,
+        label      => $field->label,
+        html_name  => $field->html_name,
+        %{ $self->$method($field) },
+    );
+
+    my @errors = $field->errors;
+    if (@errors) {
+        $output{errors} = { error => [] };
+        push @{ $output{errors}{error} }, $_ for @errors;
+    }
+ 
+    return \%output;
+}
+
+sub render_text
+{
+    my ( $self, $field ) = @_;
+    my %output = (
+        value => $field->fif
+    );
+    $output{size}      = $field->size      if $field->size;
+    $output{maxlength} = $field->maxlength if $field->maxlength;
+ 
+    return \%output;
+}
+
+sub render_password
+{
+    my ( $self, $field ) = @_;
+    return $self->render_text($field);
+}
+
+sub render_hidden
+{
+    my ( $self, $field ) = @_;
+    return {
+        value => $field->fif
+    };
+}
+
+sub render_select
+{
+    my ( $self, $field ) = @_;
+
+    my %output = (
+        options => { option => [] }
+    );
+    $output{size}     = $field->size      if $field->size;
+    $output{multiple} = $field->multiple == 1;
+
+    my $index = 0;
+    foreach my $opt ( $field->options )
+    {
+        my %option = (
+            id    => $field->id . ".$index",
+            value => $opt->{value},
+            label => $opt->{label},
+        );
+        if ($field->fif)
+        {
+            if ( $field->multiple == 1 )
+            {
+                my @fif;
+                if( ref $field->fif ){
+                    @fif = @{ $field->fif };
+                }
+                else{
+                    @fif = ( $field->fif );
+                }
+                foreach my $optval ( @fif )
+                {
+                    if ($optval == $opt->{value}) {
+                        $option{selected} = 1;
+                        last;
+                    }
+                }
+            }
+            else
+            {
+                $option{selected} = 1
+                    if $opt->{value} eq $field->fif;
+            }
+        }
+        push @{ $output{options}{option} }, \%option;
+        $index++;
+    }
+    return \%output;
+}
+
+sub render_checkbox
+{
+    my ( $self, $field ) = @_;
+
+    my %output = (
+        value => $field->fif
+    );
+    $output{checkbox_value} = $field->checkbox_value if $field->checkbox_value;
+    $output{checked} = 1 if $field->fif eq $field->checkbox_value;
+ 
+    return \%output;
+}
+
+
+sub render_radio_group
+{
+    my ( $self, $field ) = @_;
+
+    my %output = (
+        options => { option => [] }
+        value   => $field->fif;
+    );
+
+    my $index = 0;
+    foreach my $opt ( $field->options )
+    {
+        my %option = (
+            id    => $field->id . ".$index",
+            value => $opt->{value},
+            label => $opt->{label},
+        );
+        $option{checked} = 1 if $opt->{value} eq $field->fif;
+        $index++;
+    }
+    return \%output;
+}
+
+sub render_textarea
+{
+   my ( $self, $field ) = @_;
+   return {
+       value => $field->fif || '',
+       cols  => $field->cols || 10,
+       rows  => $field->rows || 5,
+   };
+}
+
+sub render_compound
+{
+   my ( $self, $field ) = @_;
+
+   my %output = {
+       fields => { field => [] }
+   };
+   foreach my $subfield ($field->sorted_fields)
+   {
+       push @{ $output->{fields}{field} }, $self->render_field($subfield);
+   }
+   return \%output;
+}
+
+sub render_submit
+{
+   my ( $self, $field ) = @_;
+   return {
+       value => $field->fif || '',
+   };
 }
 
 =head1 AUTHOR
@@ -56,19 +231,15 @@ Michael Nachbaur, C<< <mike at nachbaur.com> >>
 
 =head1 BUGS
 
-Please report any bugs or feature requests to C<bug-html-formhandler-render-xml at rt.cpan.org>, or through
+Please report any bugs or feature requests to C<bug-html-formhandler-render-hash at rt.cpan.org>, or through
 the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=HTML-FormHandler-Render-Hash>.  I will be notified, and then you'll
 automatically be notified of progress on your bug as I make changes.
-
-
-
 
 =head1 SUPPORT
 
 You can find documentation for this module with the perldoc command.
 
     perldoc HTML::FormHandler::Render::Hash
-
 
 You can also look for information at:
 
