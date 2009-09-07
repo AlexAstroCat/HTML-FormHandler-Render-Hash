@@ -58,19 +58,21 @@ sub render_field_struct
 {
     my ($self, $field, $method, $class) = @_;
 
-    my $l_type = defined $self->get_label_type( $field->widget )
-        ? $self->get_label_type( $field->widget )
-        : '';
-
     my %output = (
         id         => $field->id,
         widget     => $field->widget,
-        class      => $class,
-        label_type => $l_type,
         label      => $field->label,
-        html_name  => $field->html_name,
+        name       => $field->html_name,
         %{ $self->$method($field) },
     );
+
+    my $l_type = defined $self->get_label_type( $field->widget )
+        ? $self->get_label_type( $field->widget )
+        : '';
+    $class =~ s/^ class="//;
+    $class =~ s/"$//;
+    $output{class}      = $class  if $class;
+    $output{label_type} = $l_type if $l_type;
 
     my @errors = $field->errors;
     if (@errors) {

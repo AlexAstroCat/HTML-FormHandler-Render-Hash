@@ -12,7 +12,7 @@ use HTML::FormHandler;
 
    has '+name' => ( default => 'testform' );
    has_field 'number';
-   has_field 'fruit' => ( type => 'Select' );
+   has_field 'fruit' => ( type => 'Select', css_class => 'Booyah' );
    has_field 'vegetables' => ( type => 'Multiple' );
    has_field 'opt_in' => ( type => 'Select', widget => 'radio_group',
       options => [{ value => 0, label => 'No'}, { value => 1, label => 'Yes'} ] );
@@ -73,8 +73,7 @@ my $params = {
 $form->process( $params );
 
 my $number_field = {
-    class      => '',
-    html_name  => 'number',
+    name       => 'number',
     id         => 'number',
     label      => 'Number',
     label_type => 'label',
@@ -84,8 +83,8 @@ my $number_field = {
 eq_or_diff($form->render_field( $form->field('number') ), $number_field, 'text field');
 
 my $fruit_field = {
-    class => '',
-    html_name => 'fruit',
+    class => 'Booyah ',
+    name => 'fruit',
     id => 'fruit',
     label => 'Fruit',
     label_type => 'label',
@@ -115,8 +114,7 @@ my $fruit_field = {
 eq_or_diff($form->render_field( $form->field('fruit') ), $fruit_field, 'select field');
 
 my $vegetables_field = {
-    class => '',
-    html_name => 'vegetables',
+    name => 'vegetables',
     id => 'vegetables',
     label => 'Vegetables',
     label_type => 'label',
@@ -153,8 +151,7 @@ my $vegetables_field = {
 eq_or_diff($form->render_field( $form->field('vegetables') ), $vegetables_field, 'multiple select field');
 
 my $opt_in_field = {
-    class => '',
-    html_name => 'opt_in',
+    name => 'opt_in',
     id => 'opt_in',
     label => 'Opt_in',
     label_type => 'label',
@@ -168,8 +165,7 @@ eq_or_diff($form->render_field( $form->field('opt_in') ), $opt_in_field, 'radio 
 
 my $active_field = {
     checkbox_value => '1',
-    class => '',
-    html_name => 'active',
+    name => 'active',
     id => 'active',
     label => 'Active',
     label_type => 'label',
@@ -179,9 +175,8 @@ my $active_field = {
 eq_or_diff($form->render_field( $form->field('active') ), $active_field, 'checkbox field');
 
 my $comments_field = {
-    class => '',
     cols => 10,
-    html_name => 'comments',
+    name => 'comments',
     id => 'comments',
     label => 'Comments',
     label_type => 'label',
@@ -192,11 +187,9 @@ my $comments_field = {
 eq_or_diff($form->render_field( $form->field('comments') ), $comments_field, 'textarea field');
 
 my $hidden_field = {
-    class => '',
-    html_name => 'hidden',
+    name => 'hidden',
     id => 'hidden',
     label => 'Hidden',
-    label_type => '',
     value => '1234',
     widget => 'hidden'
 };
@@ -205,8 +198,7 @@ eq_or_diff($form->render_field( $form->field('hidden') ), $hidden_field, 'hidden
 my $selected_field = {
     checkbox_value => '1',
     checked => 1,
-    class => '',
-    html_name => 'selected',
+    name => 'selected',
     id => 'selected',
     label => 'Selected',
     label_type => 'label',
@@ -215,51 +207,8 @@ my $selected_field = {
 };
 eq_or_diff($form->render_field( $form->field('selected') ), $selected_field, 'boolean field');
 
-my $start_date_field = {
-    class => '',
-    field => [
-      {
-        class => '',
-        html_name => 'start_date.month',
-        id => 'start_date.month',
-        label => 'Month',
-        label_type => 'label',
-        size => '8',
-        value => '7',
-        widget => 'text'
-      },
-      {
-        class => '',
-        html_name => 'start_date.day',
-        id => 'start_date.day',
-        label => 'Day',
-        label_type => 'label',
-        size => '8',
-        value => '14',
-        widget => 'text'
-      },
-      {
-        class => '',
-        html_name => 'start_date.year',
-        id => 'start_date.year',
-        label => 'Year',
-        label_type => 'label',
-        size => '8',
-        value => '2006',
-        widget => 'text'
-      }
-    ],
-    html_name => 'start_date',
-    id => 'start_date',
-    label => 'Start_date',
-    label_type => 'legend',
-    widget => 'compound'
-};
-eq_or_diff($form->render_field( $form->field('start_date') ), $start_date_field, 'datetime field');
-
-$month_field = {
-    class => '',
-    html_name => 'start_date.month',
+my $month_field = {
+    name => 'start_date.month',
     id => 'start_date.month',
     label => 'Month',
     label_type => 'label',
@@ -270,8 +219,7 @@ $month_field = {
 eq_or_diff($form->render_field( $form->field('start_date.month') ), $month_field, 'datetime month field');
 
 my $day_field = {
-    class => '',
-    html_name => 'start_date.day',
+    name => 'start_date.day',
     id => 'start_date.day',
     label => 'Day',
     label_type => 'label',
@@ -282,8 +230,7 @@ my $day_field = {
 eq_or_diff($form->render_field( $form->field('start_date.day') ), $day_field, 'datetime day field');
 
 my $year_field = {
-    class => '',
-    html_name => 'start_date.year',
+    name => 'start_date.year',
     id => 'start_date.year',
     label => 'Year',
     label_type => 'label',
@@ -293,12 +240,24 @@ my $year_field = {
 };
 eq_or_diff($form->render_field( $form->field('start_date.year') ), $year_field, 'datetime year field');
 
+my $start_date_field = {
+    field => [
+      $month_field,
+      $day_field,
+      $year_field,
+    ],
+    name => 'start_date',
+    id => 'start_date',
+    label => 'Start_date',
+    label_type => 'legend',
+    widget => 'compound'
+};
+eq_or_diff($form->render_field( $form->field('start_date') ), $start_date_field, 'datetime field');
+
 my $submit_field = {
-    class => '',
-    html_name => 'submit',
+    name => 'submit',
     id => 'submit',
     label => 'Submit',
-    label_type => '',
     value => 'Update',
     widget => 'submit'
 };
