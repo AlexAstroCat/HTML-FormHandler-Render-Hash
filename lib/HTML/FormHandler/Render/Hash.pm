@@ -74,10 +74,9 @@ sub render_field_struct
     $output{class}      = $class  if $class;
     $output{label_type} = $l_type if $l_type;
 
-    my @errors = $field->errors;
-    if (@errors) {
+    if ($field->has_errors) {
         $output{errors} = { error => [] };
-        push @{ $output{errors}{error} }, $_ for @errors;
+        push @{ $output{errors}{error} }, $_ for $field->errors;
     }
  
     return \%output;
