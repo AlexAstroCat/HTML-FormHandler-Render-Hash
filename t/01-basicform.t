@@ -83,7 +83,7 @@ my $number_field = {
 eq_or_diff($form->render_field( $form->field('number') ), $number_field, 'text field');
 
 my $fruit_field = {
-    class => 'Booyah ',
+    class => 'Booyah',
     name => 'fruit',
     id => 'fruit',
     label => 'Fruit',
@@ -123,26 +123,26 @@ my $vegetables_field = {
       option => [
         {
           id => 'vegetables.0',
+          label => 'lettuce',
+          value => 1
+        },
+        {
+          id => 'vegetables.1',
           label => 'broccoli',
           selected => 1,
           value => 2
         },
         {
-          id => 'vegetables.1',
+          id => 'vegetables.2',
+          label => 'carrots',
+          value => 3
+        },
+        {
+          id => 'vegetables.3',
           label => 'peas',
           selected => 1,
           value => 4
         },
-        {
-          id => 'vegetables.2',
-          label => 'lettuce',
-          value => 1
-        },
-        {
-          id => 'vegetables.3',
-          label => 'carrots',
-          value => 3
-        }
       ]
     },
     size => '5',
@@ -255,10 +255,10 @@ my $start_date_field = {
 eq_or_diff($form->render_field( $form->field('start_date') ), $start_date_field, 'datetime field');
 
 my $submit_field = {
-    name => 'submit',
-    id => 'submit',
-    label => 'Submit',
-    value => 'Update',
+    name   => 'submit',
+    id     => 'submit',
+    label  => 'Submit',
+    value  => 'Update',
     widget => 'submit'
 };
 eq_or_diff($form->render_field( $form->field('submit') ), $submit_field, 'submit field');

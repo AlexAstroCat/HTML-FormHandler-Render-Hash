@@ -56,14 +56,14 @@ sub render
 
 sub render_field_struct
 {
-    my ($self, $field, $method, $class) = @_;
+    my ($self, $field, $rendered_field, $class) = @_;
 
     my %output = (
         id         => $field->id,
         widget     => $field->widget,
         label      => $field->label,
         name       => $field->html_name,
-        %{ $self->$method($field) },
+        %{ $rendered_field },
     );
 
     my $l_type = defined $self->get_label_type( $field->widget )
@@ -222,7 +222,7 @@ sub render_submit
 {
    my ( $self, $field ) = @_;
    return {
-       value => $field->fif || '',
+       value => $field->fif || $field->value || '',
    };
 }
 

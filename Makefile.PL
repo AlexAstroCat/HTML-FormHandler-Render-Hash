@@ -5,7 +5,7 @@ WriteMakefile
           'NAME' => 'HTML::FormHandler::Render::Hash',
           'VERSION_FROM' => 'lib/HTML/FormHandler/Render/Hash.pm',
           'PREREQ_PM' => {
-                           'HTML::FormHandler' => 0,
+                           'HTML::FormHandler' => '0.28001',
                            'Test::Differences' => 0,
                            'Test::More' => 0
                          },
